@@ -152,15 +152,13 @@ class GridCaptcha
      * 效验验证码是否正确
      * @param string $captchaKey
      * @param string $captchaCode
-     * @param bool $checkAndDelete
+     * @param bool $check_delete
      * @return false|array
      */
-    public function check(string $captchaKey, string $captchaCode, bool $checkAndDelete = true)
+    public function check(string $captchaKey, string $captchaCode, bool $check_delete = true)
     {
-        //判断是否获取到
-        $captcha_data = $checkAndDelete
-            ? Cache::get("$this->cacheKey:data:" . $captchaKey, false)
-            : Cache::get("$this->cacheKey:data:" . $captchaKey, false);
+        $captcha_data = Cache::get("$this->cacheKey:data:" . $captchaKey, false);
+
         if ($captcha_data === false || $captcha_data === null) {
             return false;
         }
@@ -173,16 +171,19 @@ class GridCaptcha
         )) {
             return false;
         }
+        if ($check_delete) {
+            Cache::delete("$this->cacheKey:data:" . $captchaKey);
+        }
         return $captcha_data['captcha_data'];
     }
 
     /**
      * 效验验证码是否正确 直接传递 Request 对象方式效验
      * @param Request $request
-     * @param bool $checkAndDelete 效验之后是否删除
+     * @param bool $check_delete 效验之后是否删除
      * @return false|array
      */
-    public function checkRequest(Request $request, bool $checkAndDelete = true)
+    public function checkRequest(Request $request, bool $check_delete = true)
     {
         $validate = validate(
             [
@@ -193,7 +194,7 @@ class GridCaptcha
         if (!$validate->check($request->all())) {
             return false;
         }
-        return $this->check($request->input($this->captchaKeyString), $request->input($this->captchaKeyCodeString), $checkAndDelete);
+        return $this->check($request->input($this->captchaKeyString), $request->input($this->captchaKeyCodeString), $check_delete);
     }
 
     /**
