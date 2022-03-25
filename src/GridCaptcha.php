@@ -190,10 +190,10 @@ class GridCaptcha
                 $this->captchaKeyCodeString => 'required|integer|between:1,4',
             ]
         );
-        if (!$validate->check($request)) {
+        if (!$validate->check($request->all())) {
             return false;
         }
-        return $this->check($request[$this->captchaKeyString], $request[$this->captchaKeyCodeString], $checkAndDelete);
+        return $this->check($request->input($this->captchaKeyString), $request->input($this->captchaKeyCodeString), $checkAndDelete);
     }
 
     /**
