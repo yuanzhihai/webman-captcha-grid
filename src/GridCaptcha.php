@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace yzh52521\GridCaptcha;
 
-use support\Cache;
+use support\Redis;
 use support\Request;
 
 class GridCaptcha
@@ -138,13 +138,13 @@ class GridCaptcha
         $this->captchaCode = substr(str_shuffle('012345678'), 0, 4);
         $this->captchaKey  = $this->random($this->captchaKeyLength);
 
-        $this->imageFile = Cache::has("{$this->cacheKey}_path") ? Cache::get("{$this->cacheKey}_path") : Cache::set("{$this->cacheKey}_path", $this->getImageFile(), 604800);
+        $this->imageFile = Redis::exists("$this->cacheKey:path") ? unserialize(Redis::get("$this->cacheKey:path")) : Redis::setex("$this->cacheKey:path", 604800, serialize($this->getImageFile()));
 
-        Cache::set("{$this->cacheKey}_data_$this->captchaKey", [
+        Redis::set("$this->cacheKey:data:$this->captchaKey", serialize([
             'captcha_key'  => $this->captchaKey,
             'captcha_code' => $this->captchaCode,
             'captcha_data' => $captchaData,
-        ], $this->captchaValidity);
+        ]), $this->captchaValidity);
         return $this->generateIntCodeImg();
     }
 
@@ -157,7 +157,7 @@ class GridCaptcha
      */
     public function check(string $captchaKey, string $captchaCode, bool $check_delete = true)
     {
-        $captcha_data = Cache::get("{$this->cacheKey}_data_" . $captchaKey, false);
+        $captcha_data = unserialize(Redis::get("$this->cacheKey:data:" . $captchaKey));
 
         if ($captcha_data === false || $captcha_data === null) {
             return false;
@@ -172,7 +172,7 @@ class GridCaptcha
             return false;
         }
         if ($check_delete) {
-            Cache::delete("{$this->cacheKey}_data_" . $captchaKey);
+            Redis::del("$this->cacheKey:data:" . $captchaKey);
         }
         return $captcha_data['captcha_data'];
     }
@@ -273,7 +273,7 @@ class GridCaptcha
                 $start_x = $line_x;
                 $start_y = $start_y + $pic_h + $space_y;
             }
-            //缓存中读取文件
+
             $gd_resource = imagecreatefromstring(file_get_contents($path));
 
             imagecopyresized(
