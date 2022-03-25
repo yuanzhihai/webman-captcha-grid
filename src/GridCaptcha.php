@@ -137,10 +137,10 @@ class GridCaptcha
         $this->captchaData = $captchaData;
         $this->captchaCode = substr(str_shuffle('012345678'), 0, 4);
         $this->captchaKey  = $this->random($this->captchaKeyLength);
-        $this->imageFile   = Cache::remember("$this->cacheKey:path", function () {
-            return $this->getImageFile();
-        }, 604800);
-        Cache::set("$this->cacheKey:data:$this->captchaKey", [
+
+        $this->imageFile = Cache::has("{$this->cacheKey}_path") ? Cache::get("{$this->cacheKey}_path") : Cache::set("{$this->cacheKey}_path", $this->getImageFile(), 604800);
+
+        Cache::set("{$this->cacheKey}_data_$this->captchaKey", [
             'captcha_key'  => $this->captchaKey,
             'captcha_code' => $this->captchaCode,
             'captcha_data' => $captchaData,
@@ -157,7 +157,7 @@ class GridCaptcha
      */
     public function check(string $captchaKey, string $captchaCode, bool $check_delete = true)
     {
-        $captcha_data = Cache::get("$this->cacheKey:data:" . $captchaKey, false);
+        $captcha_data = Cache::get("{$this->cacheKey}_data_" . $captchaKey, false);
 
         if ($captcha_data === false || $captcha_data === null) {
             return false;
@@ -172,7 +172,7 @@ class GridCaptcha
             return false;
         }
         if ($check_delete) {
-            Cache::delete("$this->cacheKey:data:" . $captchaKey);
+            Cache::delete("{$this->cacheKey}_data_" . $captchaKey);
         }
         return $captcha_data['captcha_data'];
     }
@@ -274,15 +274,8 @@ class GridCaptcha
                 $start_y = $start_y + $pic_h + $space_y;
             }
             //缓存中读取文件
-            $gd_resource = imagecreatefromstring(
-                Cache::remember(
-                    "$this->cacheKey:file:$path",
-                    function () use ($path) {
-                        return file_get_contents($path);
-                    },
-                    604800
-                )
-            );
+            $gd_resource = imagecreatefromstring(file_get_contents($path));
+
             imagecopyresized(
                 $background,
                 $gd_resource,
