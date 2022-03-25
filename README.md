@@ -163,7 +163,6 @@ class Test
 
 
 - 本地化提示
-
 >具体使用  https://www.workerman.net/doc/webman/components/translation.html
  ```
 resource/translations/zh_CN/messages.php
@@ -193,7 +192,7 @@ return [
   例：新增一个类型为 `pingguo` 验证码类型的图片，需要在配置文件中的 `image.path` 目录下创建名为 `pingguo` 的目录并且把相关类型的图片文件存放在 `pingguo` 目录，新增一个类型至少要有四张相关类型的图片，不限制文件名，只要文件后缀名是配置文件中指定的即可如下:
 ```
 ─storage
-    └─gridcaptcha
+    └─grid-captcha
         └─image
             ├─pingguo
             │       1.jpg
