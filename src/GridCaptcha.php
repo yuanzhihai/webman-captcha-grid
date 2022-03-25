@@ -138,13 +138,12 @@ class GridCaptcha
         $this->captchaCode = substr(str_shuffle('012345678'), 0, 4);
         $this->captchaKey  = $this->random($this->captchaKeyLength);
 
-        $this->imageFile = Redis::exists("$this->cacheKey:path") ? unserialize(Redis::get("$this->cacheKey:path")) : Redis::setex("$this->cacheKey:path", 604800, serialize($this->getImageFile()));
+        $this->imageFile = Redis::exists("$this->cacheKey:path") ? unserialize(Redis::get("$this->cacheKey:path")) : Redis::setEx("$this->cacheKey:path", 604800, serialize($this->getImageFile()));
 
-        Redis::set("$this->cacheKey:data:$this->captchaKey", serialize([
-            'captcha_key'  => $this->captchaKey,
-            'captcha_code' => $this->captchaCode,
-            'captcha_data' => $captchaData,
-        ]), $this->captchaValidity);
+        Redis::setEx("$this->cacheKey:data:$this->captchaKey",
+            $this->captchaValidity,
+            serialize(['captcha_key' => $this->captchaKey, 'captcha_code' => $this->captchaCode, 'captcha_data' => $captchaData,])
+        );
         return $this->generateIntCodeImg();
     }
 
