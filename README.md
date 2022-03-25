@@ -66,7 +66,7 @@ class Test
      * 生成验证码
      * @return array
      */
-    public function object()
+    public function captcha()
     {
         $captcha = new \yzh52521\GridCaptcha\GridCaptcha();
         return json($captcha->get([
