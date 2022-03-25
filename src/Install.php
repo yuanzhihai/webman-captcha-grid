@@ -10,7 +10,7 @@ class Install
      * @var array
      */
     protected static $pathRelation = array(
-        'config/plugin/yzh52521/gridcaptcha' => 'config/plugin/yzh52521/gridcaptcha',
+        'config/plugin/yzh52521/grid-captcha' => 'config/plugin/yzh52521/grid-captcha',
     );
 
     /**

@@ -100,7 +100,7 @@ class GridCaptcha
     public function __construct()
     {
         //初始化配置
-        $config                 = config('plugin.yzh52521.gridcaptcha.app.gridcaptcha');
+        $config                 = config('plugin.yzh52521.grid-captcha.app.grid_captcha');
         $this->captchaImagePath = $config['image']['path'];
         $this->imageSuffix      = $config['image']['suffix'];
         $this->imageQuality     = $config['image']['quality'];
