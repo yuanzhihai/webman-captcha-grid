@@ -1,0 +1,36 @@
+{
+  "name": "yzh52521/webman-captcha-grid",
+  "description": "webman quickly creates a verification code tool similar to Google verification code",
+  "keywords": [
+    "google-captcha",
+    "google captcha",
+    "recaptcha",
+    "captcha",
+    "Captcha",
+    "Security",
+    "webman",
+    "webman captcha",
+    "GridCaptcha"
+  ],
+  "homepage": "https://github.com/yzh52521/webman-captcha-grid",
+  "require": {
+    "php": ">=7.2",
+    "ext-gd": "*"
+  },
+  "require-dev": {
+    "workerman/webman-framework": "^1.2.1",
+    "topthink/think-validate": "^2.0"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "yzh52521\\GridCaptcha\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "yzh52251",
+      "email": "396751927@qq.com"
+    }
+  ]
+},
