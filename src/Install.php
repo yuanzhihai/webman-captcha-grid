@@ -19,9 +19,9 @@ class Install
      */
     public static function install()
     {
-        $resources = __DIR__ . '/resources';
+        $resources = __DIR__ . '/resource';
         $storage   = __DIR__ . '/storage';
-        self::copyFile($resources, base_path());
+        self::copyFile($resources, base_path().'/resource');
         self::copyFile($storage, public_path() . '/storage');
         static::installByRelation();
     }
