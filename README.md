@@ -68,8 +68,8 @@ class Test
      */
     public function captcha()
     {
-        $captcha = new \yzh52521\GridCaptcha\GridCaptcha();
-        return json($captcha->get([
+     
+        return json(\yzh52521\GridCaptcha\facade\GridCaptcha::get([
             'mobile' => '100xxxxx121'
         ]));
     }
@@ -131,17 +131,17 @@ class Test
      */
     public function check(Request $request)
     {
-        $captcha = new \yzh52521\GridCaptcha\GridCaptcha();
+      
         /**
          * 传参效验
          */
-        if ($captcha_data = $captcha->check('Qh8kHYF4C....', '1540') === false) {
+        if ($captcha_data = \yzh52521\GridCaptcha\facade\GridCaptcha::check('Qh8kHYF4C....', '1540') === false) {
             return json(['message' => '验证码错误', 'code' => 401]);
         }
         /**
          * 传递 Request 对象效验
          */
-        if ($captcha_data = $captcha->checkRequest($request)) {
+        if ($captcha_data = \yzh52521\GridCaptcha\facade\GridCaptcha::checkRequest($request)) {
             return json(['message' => '验证码错误', 'code' => 401]);
         }
 
