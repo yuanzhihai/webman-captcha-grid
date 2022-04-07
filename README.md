@@ -165,14 +165,13 @@ class Test
 - 本地化提示
 >具体使用  https://www.workerman.net/doc/webman/components/translation.html
  ```
-resource/translations/zh_CN/messages.php
+resource/translations/zh_CN/grid-captcha.php
 ```
 
 ```php
 <?php
 //一个图片目录对应一个提示
 return [
- 'grid-captcha' => [
     'banmaxian' => '斑马线',
     'gongjiaoche' => '公交车',
     'heiban' => '黑板',
@@ -183,7 +182,7 @@ return [
     'shutiao' => '薯条',
     'xiaofangshuan' => '消防栓',
     'zhenglong' => '蒸笼',
-    ]
+  
 ];
 ```
 
