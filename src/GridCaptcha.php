@@ -237,8 +237,8 @@ class GridCaptcha
         }
 
         //处理提示文本
-        $trans_key = "grid-captcha.$correct_str";
-        $hint      = trans($trans_key);
+        $trans_key = "$correct_str";
+        $hint      = trans($trans_key,[],'grid-captcha',config('translation.locale'));
         if ($trans_key == $hint) {
             $hint = $correct_str;
         }
