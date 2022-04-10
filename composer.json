@@ -19,7 +19,7 @@
   },
   "require-dev": {
     "workerman/webman-framework": "^1.2.1",
-    "topthink/think-validate": "^2.0"
+    "yzh52521/webman-validate": "^0.1"
   },
   "license": "MIT",
   "autoload": {
