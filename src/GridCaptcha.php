@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare( strict_types = 1 );
 
 namespace yzh52521\GridCaptcha;
 
@@ -100,7 +100,7 @@ class GridCaptcha
     public function __construct()
     {
         //初始化配置
-        $config                 = config('plugin.yzh52521.grid-captcha.app.grid_captcha');
+        $config                 = config( 'plugin.yzh52521.grid-captcha.app.grid_captcha' );
         $this->captchaImagePath = $config['image']['path'];
         $this->imageSuffix      = $config['image']['suffix'];
         $this->imageQuality     = $config['image']['quality'];
@@ -123,7 +123,7 @@ class GridCaptcha
      */
     public function get(array $captchaData = []): array
     {
-        return $this->make($captchaData);
+        return $this->make( $captchaData );
     }
 
     /**
@@ -135,18 +135,13 @@ class GridCaptcha
     protected function make(array $captchaData = []): array
     {
         $this->captchaData = $captchaData;
-        $this->captchaCode = substr(str_shuffle('012345678'), 0, 4);
-        $this->captchaKey  = $this->random($this->captchaKeyLength);
-
-        if(!Redis::exists("$this->cacheKey:path")){
-            Redis::setEx("$this->cacheKey:path", 604800, serialize($this->getImageFile()));
-            usleep(200000);
-        }
-        $this->imageFile =  unserialize(Redis::get("$this->cacheKey:path"));
-
-        Redis::setEx("$this->cacheKey:data:$this->captchaKey",
+        $this->captchaCode = substr( str_shuffle( '012345678' ),0,4 );
+        $this->captchaKey  = $this->random( $this->captchaKeyLength );
+        Redis::setEx( "$this->cacheKey:path",604800,serialize( $this->getImageFile() ) );
+        $this->imageFile = unserialize( Redis::get( "$this->cacheKey:path" ) );
+        Redis::setEx( "$this->cacheKey:data:$this->captchaKey",
             $this->captchaValidity,
-            serialize(['captcha_key' => $this->captchaKey, 'captcha_code' => $this->captchaCode, 'captcha_data' => $captchaData,])
+            serialize( ['captcha_key' => $this->captchaKey,'captcha_code' => $this->captchaCode,'captcha_data' => $captchaData,] )
         );
         return $this->generateIntCodeImg();
     }
@@ -158,9 +153,9 @@ class GridCaptcha
      * @param bool $check_delete
      * @return false|array
      */
-    public function check(string $captchaKey, string $captchaCode, bool $check_delete = true)
+    public function check(string $captchaKey,string $captchaCode,bool $check_delete = true)
     {
-        $captcha_data = unserialize(Redis::get("$this->cacheKey:data:" . $captchaKey));
+        $captcha_data = unserialize( Redis::get( "$this->cacheKey:data:".$captchaKey ) );
 
         if ($captcha_data === false || $captcha_data === null) {
             return false;
@@ -168,14 +163,14 @@ class GridCaptcha
         //判断验证码是正确
         if (!empty(
         array_diff(
-            str_split($captcha_data['captcha_code']),
-            str_split($captchaCode)
+            str_split( $captcha_data['captcha_code'] ),
+            str_split( $captchaCode )
         )
         )) {
             return false;
         }
         if ($check_delete) {
-            Redis::del("$this->cacheKey:data:" . $captchaKey);
+            Redis::del( "$this->cacheKey:data:".$captchaKey );
         }
         return $captcha_data['captcha_data'];
     }
@@ -186,7 +181,7 @@ class GridCaptcha
      * @param bool $check_delete 效验之后是否删除
      * @return false|array
      */
-    public function checkRequest(Request $request, bool $check_delete = true)
+    public function checkRequest(Request $request,bool $check_delete = true)
     {
         $validate = validate(
             [
@@ -194,10 +189,10 @@ class GridCaptcha
                 $this->captchaKeyCodeString => 'required|integer|between:1,4',
             ]
         );
-        if (!$validate->check($request->all())) {
+        if (!$validate->check( $request->all() )) {
             return false;
         }
-        return $this->check($request->input($this->captchaKeyString), $request->input($this->captchaKeyCodeString), $check_delete);
+        return $this->check( $request->input( $this->captchaKeyString ),$request->input( $this->captchaKeyCodeString ),$check_delete );
     }
 
     /**
@@ -207,38 +202,38 @@ class GridCaptcha
     protected function generateIntCodeImg(): array
     {
         //随机获取正确的验证码
-        $correct_str  = array_rand($this->imageFile, 1);
+        $correct_str  = array_rand( $this->imageFile,1 );
         $correct_path = $this->imageFile[$correct_str];
-        $correct_key  = array_rand($correct_path, 4);
+        $correct_key  = array_rand( $correct_path,4 );
         //移除正确的验证码 [方便后面取错误验证码 , 不会重复取到正确的]
-        unset($this->imageFile[$correct_str]);
+        unset( $this->imageFile[$correct_str] );
 
         //循环获取正确的验证码图片
         $correct_img = [];
-        foreach ($correct_key as $key) {
+        foreach ( $correct_key as $key ) {
             $correct_img[] = $correct_path[$key];
         }
 
         //循环获取错误的验证码
-        $error_key = array_rand($this->imageFile, 5);
+        $error_key = array_rand( $this->imageFile,5 );
         $error_img = [];
-        foreach ($error_key as $path_key) {
+        foreach ( $error_key as $path_key ) {
             $error_path  = $this->imageFile[$path_key];
-            $error_img[] = $error_path[array_rand($error_path, 1)];
+            $error_img[] = $error_path[array_rand( $error_path,1 )];
         }
 
         //对全部验证码图片打乱排序
-        $code_array  = str_split($this->captchaCode);
+        $code_array  = str_split( $this->captchaCode );
         $results_img = [];
-        for ($i = 0; $i < 9; $i++) {
-            $results_img[] = in_array($i, $code_array)
-                ? array_shift($correct_img)
-                : array_shift($error_img);
+        for ( $i = 0; $i < 9; $i++ ) {
+            $results_img[] = in_array( $i,$code_array )
+                ? array_shift( $correct_img )
+                : array_shift( $error_img );
         }
 
         //处理提示文本
         $trans_key = "$correct_str";
-        $hint      = trans($trans_key,[],'grid-captcha',config('translation.locale'));
+        $hint      = trans( $trans_key,[],'grid-captcha',config( 'translation.locale' ) );
         if ($trans_key == $hint) {
             $hint = $correct_str;
         }
@@ -247,7 +242,7 @@ class GridCaptcha
         return [
             'hint'        => $hint,
             'captcha_key' => $this->captchaKey,
-            'image'       => $this->combinationCaptchaImg($results_img),
+            'image'       => $this->combinationCaptchaImg( $results_img ),
         ];
     }
 
@@ -260,16 +255,16 @@ class GridCaptcha
     {
         //初始化参数
         $space_x = $space_y = $start_x = $start_y = $line_x = 0;
-        $pic_w   = (int)($this->captchaImageWide / 3);
-        $pic_h   = (int)($this->captchaImageHigh / 3);
+        $pic_w   = (int)( $this->captchaImageWide / 3 );
+        $pic_h   = (int)( $this->captchaImageHigh / 3 );
 
         //设置背景
-        $background = imagecreatetruecolor($this->captchaImageWide, $this->captchaImageHigh);
-        $color      = imagecolorallocate($background, 255, 255, 255);
-        imagefill($background, 0, 0, $color);
-        imageColorTransparent($background, $color);
+        $background = imagecreatetruecolor( $this->captchaImageWide,$this->captchaImageHigh );
+        $color      = imagecolorallocate( $background,255,255,255 );
+        imagefill( $background,0,0,$color );
+        imageColorTransparent( $background,$color );
 
-        foreach ($imgPath as $key => $path) {
+        foreach ( $imgPath as $key => $path ) {
             $keys = $key + 1;
             //图片换行
             if ($keys == 4 || $keys == 7) {
@@ -277,7 +272,7 @@ class GridCaptcha
                 $start_y = $start_y + $pic_h + $space_y;
             }
 
-            $gd_resource = imagecreatefromstring(file_get_contents($path));
+            $gd_resource = imagecreatefromstring( file_get_contents( $path ) );
 
             imagecopyresized(
                 $background,
@@ -288,16 +283,16 @@ class GridCaptcha
                 0,
                 $pic_w,
                 $pic_h,
-                imagesx($gd_resource),
-                imagesy($gd_resource)
+                imagesx( $gd_resource ),
+                imagesy( $gd_resource )
             );
             $start_x = $start_x + $pic_w + $space_x;
         }
         ob_start();
-        imagejpeg($background, null, $this->imageQuality);
+        imagejpeg( $background,null,$this->imageQuality );
         //释放图片资源
-        imagedestroy($background);
-        return "data:image/jpeg;base64," . base64_encode(ob_get_clean());
+        imagedestroy( $background );
+        return "data:image/jpeg;base64,".base64_encode( ob_get_clean() );
     }
 
     /**
@@ -308,14 +303,14 @@ class GridCaptcha
     protected function getImageFile(): array
     {
         //获取验证码目录下面的图片
-        $image_path = glob($this->captchaImagePath . '/*');
+        $image_path = glob( $this->captchaImagePath.'/*' );
         $image_file = [];
-        foreach ($image_path as $file) {
-            $image_file[pathinfo($file)['basename'] ?? 'null'] = glob("$file/*.$this->imageSuffix");
+        foreach ( $image_path as $file ) {
+            $image_file[pathinfo( $file )['basename'] ?? 'null'] = glob( "$file/*.$this->imageSuffix" );
         }
-        unset($image_file['null']);
-        if (empty($image_file)) {
-            throw new \Exception('找不到验证码图片');
+        unset( $image_file['null'] );
+        if (empty( $image_file )) {
+            throw new \Exception( '找不到验证码图片' );
         }
         return $image_file;
     }
@@ -337,38 +332,38 @@ class GridCaptcha
      * @param string $addChars
      * @return string
      */
-    private function random(int $length = 6, int $type = null, string $addChars = ''): string
+    private function random(int $length = 6,int $type = null,string $addChars = ''): string
     {
         $str = '';
-        switch ($type) {
+        switch ( $type ) {
             case 0:
-                $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' . $addChars;
+                $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.$addChars;
                 break;
             case 1:
-                $chars = str_repeat('0123456789', 3);
+                $chars = str_repeat( '0123456789',3 );
                 break;
             case 2:
-                $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' . $addChars;
+                $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.$addChars;
                 break;
             case 3:
-                $chars = 'abcdefghijklmnopqrstuvwxyz' . $addChars;
+                $chars = 'abcdefghijklmnopqrstuvwxyz'.$addChars;
                 break;
             case 4:
-                $chars = "们以我到他会作时要动国产的一是工就年阶义发成部民可出能方进在了不和有大这主中人上为来分生对于学下级地个用同行面说种过命度革而多子后自社加小机也经力线本电高量长党得实家定深法表着水理化争现所二起政三好十战无农使性前等反体合斗路图把结第里正新开论之物从当两些还天资事队批点育重其思与间内去因件日利相由压员气业代全组数果期导平各基或月毛然如应形想制心样干都向变关问比展那它最及外没看治提五解系林者米群头意只明四道马认次文通但条较克又公孔领军流入接席位情运器并飞原油放立题质指建区验活众很教决特此常石强极土少已根共直团统式转别造切九你取西持总料连任志观调七么山程百报更见必真保热委手改管处己将修支识病象几先老光专什六型具示复安带每东增则完风回南广劳轮科北打积车计给节做务被整联步类集号列温装即毫知轴研单色坚据速防史拉世设达尔场织历花受求传口断况采精金界品判参层止边清至万确究书" . $addChars;
+                $chars = "们以我到他会作时要动国产的一是工就年阶义发成部民可出能方进在了不和有大这主中人上为来分生对于学下级地个用同行面说种过命度革而多子后自社加小机也经力线本电高量长党得实家定深法表着水理化争现所二起政三好十战无农使性前等反体合斗路图把结第里正新开论之物从当两些还天资事队批点育重其思与间内去因件日利相由压员气业代全组数果期导平各基或月毛然如应形想制心样干都向变关问比展那它最及外没看治提五解系林者米群头意只明四道马认次文通但条较克又公孔领军流入接席位情运器并飞原油放立题质指建区验活众很教决特此常石强极土少已根共直团统式转别造切九你取西持总料连任志观调七么山程百报更见必真保热委手改管处己将修支识病象几先老光专什六型具示复安带每东增则完风回南广劳轮科北打积车计给节做务被整联步类集号列温装即毫知轴研单色坚据速防史拉世设达尔场织历花受求传口断况采精金界品判参层止边清至万确究书".$addChars;
                 break;
             default:
-                $chars = 'ABCDEFGHIJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789' . $addChars;
+                $chars = 'ABCDEFGHIJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'.$addChars;
                 break;
         }
         if ($length > 10) {
-            $chars = $type == 1 ? str_repeat($chars, $length) : str_repeat($chars, 5);
+            $chars = $type == 1 ? str_repeat( $chars,$length ) : str_repeat( $chars,5 );
         }
         if ($type != 4) {
-            $chars = str_shuffle($chars);
-            $str   = substr($chars, 0, $length);
+            $chars = str_shuffle( $chars );
+            $str   = substr( $chars,0,$length );
         } else {
-            for ($i = 0; $i < $length; $i++) {
-                $str .= mb_substr($chars, (int)floor(mt_rand(0, mb_strlen($chars, 'utf-8') - 1)), 1);
+            for ( $i = 0; $i < $length; $i++ ) {
+                $str .= mb_substr( $chars,(int)floor( mt_rand( 0,mb_strlen( $chars,'utf-8' ) - 1 ) ),1 );
             }
         }
         return $str;
